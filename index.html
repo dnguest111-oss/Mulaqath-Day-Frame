@@ -43,15 +43,9 @@
 
     h2 {
       font-weight: 700;
-      margin-bottom: 10px;
+      margin-bottom: 30px;
       color: var(--primary-color);
       font-size: 2rem;
-    }
-
-    .subtitle {
-      color: #6b7280;
-      margin-bottom: 30px;
-      font-size: 1rem;
     }
 
     .canvas-container {
@@ -151,29 +145,6 @@
       box-shadow: 0 5px 15px rgba(239, 68, 68, 0.3);
     }
 
-    .instructions {
-      background: var(--secondary-color);
-      border-radius: var(--radius);
-      padding: 15px;
-      margin-top: 20px;
-      text-align: left;
-      font-size: 14px;
-      color: #4b5563;
-    }
-
-    .instructions h3 {
-      margin-top: 0;
-      color: var(--primary-color);
-    }
-
-    .instructions ul {
-      padding-left: 20px;
-    }
-
-    .instructions li {
-      margin-bottom: 8px;
-    }
-
     .zoom-controls {
       display: flex;
       align-items: center;
@@ -231,7 +202,6 @@
 <body>
   <div class="container">
     <h2>📸 Mulaqath Day Poster</h2>
-    <p class="subtitle">Create your personalized poster with ease</p>
 
     <div class="canvas-container">
       <canvas id="canvas" width="3508" height="2480"></canvas>
@@ -256,18 +226,8 @@
       </button>
       
       <button class="download-btn" id="downloadBtn">
-        <i class="fas fa-download"></i> Download High-Resolution
+        <i class="fas fa-download"></i> Download
       </button>
-    </div>
-
-    <div class="instructions">
-      <h3>How to use:</h3>
-      <ul>
-        <li>Upload your photo using the "Upload Photo" button</li>
-        <li>Drag the photo to position it within the frame</li>
-        <li>Use the zoom buttons or scroll/pinch to resize your photo</li>
-        <li>Click "Download High-Resolution" to save your poster</li>
-      </ul>
     </div>
   </div>
 
@@ -287,6 +247,9 @@
     let touches = [];
     let initialDistance = 0;
     let initialScale = 1;
+    
+    // Movement speed factor
+    const movementSpeed = 2.5;
 
     document.getElementById("photoInput").addEventListener("change", e => {
       const file = e.target.files[0];
@@ -335,8 +298,9 @@
     
     canvas.addEventListener("mousemove", e => {
       if (isDragging && uploadedPhoto) {
-        offsetX += e.offsetX - startX;
-        offsetY += e.offsetY - startY;
+        // Apply movement speed factor
+        offsetX += (e.offsetX - startX) * movementSpeed;
+        offsetY += (e.offsetY - startY) * movementSpeed;
         startX = e.offsetX;
         startY = e.offsetY;
         draw();
@@ -449,13 +413,13 @@
         updateZoomLevel();
         draw();
       } else if (touches.length === 1 && isDragging && uploadedPhoto) {
-        // Single touch drag
+        // Single touch drag - apply movement speed factor
         const rect = canvas.getBoundingClientRect();
         const currentX = touches[0].clientX - rect.left;
         const currentY = touches[0].clientY - rect.top;
         
-        offsetX += currentX - startX;
-        offsetY += currentY - startY;
+        offsetX += (currentX - startX) * movementSpeed;
+        offsetY += (currentY - startY) * movementSpeed;
         
         startX = currentX;
         startY = currentY;
@@ -501,10 +465,18 @@
       }
     });
 
-    // Download button
+    // Download button with serial number
     document.getElementById("downloadBtn").addEventListener("click", () => {
+      // Get or initialize serial number from localStorage
+      let serialNumber = parseInt(localStorage.getItem('mulaqathSerial') || '0');
+      serialNumber++;
+      localStorage.setItem('mulaqathSerial', serialNumber);
+      
+      // Format serial number with leading zeros (e.g., 001, 002, etc.)
+      const formattedSerial = serialNumber.toString().padStart(3, '0');
+      
       const link = document.createElement("a");
-      link.download = "MulaqathBDK_HQ.png";
+      link.download = `mulaqath_${formattedSerial}.png`;
       
       // Create a temporary canvas at full resolution
       const tempCanvas = document.createElement("canvas");
