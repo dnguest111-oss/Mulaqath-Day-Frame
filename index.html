@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mulaqath Day Poster</title>
+  <style>
+    body {
+      font-family: "Anek Malayalam", sans-serif;
+      text-align: center;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 20px;
+    }
+    h2 {
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+    canvas {
+      border-radius: 10px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+      max-width: 100%;
+      height: auto;
+      background: white;
+    }
+    .controls {
+      margin-top: 20px;
+    }
+    input, button {
+      padding: 10px 14px;
+      margin: 8px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 15px;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Anek+Malayalam:wght@600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <h2>📸 Mulaqath Day Poster</h2>
+
+  <canvas id="canvas" width="3508" height="2480"></canvas>
+
+  <div class="controls">
+    <input type="file" id="photoInput" accept="image/*"><br>
+    <button id="downloadBtn">Download High-Resolution</button>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    const frame = new Image();
+    frame.src = "frame.png";
+
+    let uploadedPhoto = null;
+    let offsetX = 0, offsetY = 0;
+    let scale = 1;
+    let isDragging = false;
+    let startX, startY;
+
+    document.getElementById("photoInput").addEventListener("change", e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const img = new Image();
+      img.onload = () => {
+        uploadedPhoto = img;
+        draw();
+      };
+      img.src = URL.createObjectURL(file);
+    });
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (uploadedPhoto) {
+        const w = uploadedPhoto.width * scale;
+        const h = uploadedPhoto.height * scale;
+        const x = canvas.width / 2 - w / 2 + offsetX;
+        const y = canvas.height / 2 - h / 2 + offsetY;
+        ctx.drawImage(uploadedPhoto, x, y, w, h);
+      }
+      ctx.drawImage(frame, 0, 0, canvas.width, canvas.height);
+    }
+
+    canvas.addEventListener("mousedown", e => {
+      isDragging = true;
+      startX = e.offsetX;
+      startY = e.offsetY;
+    });
+    canvas.addEventListener("mouseup", () => isDragging = false);
+    canvas.addEventListener("mouseleave", () => isDragging = false);
+    canvas.addEventListener("mousemove", e => {
+      if (isDragging && uploadedPhoto) {
+        offsetX += e.offsetX - startX;
+        offsetY += e.offsetY - startY;
+        startX = e.offsetX;
+        startY = e.offsetY;
+        draw();
+      }
+    });
+
+    // Scroll to zoom
+    canvas.addEventListener("wheel", e => {
+      if (uploadedPhoto) {
+        e.preventDefault();
+        scale *= e.deltaY < 0 ? 1.05 : 0.95;
+        scale = Math.max(0.1, Math.min(scale, 10));
+        draw();
+      }
+    });
+
+    document.getElementById("downloadBtn").addEventListener("click", () => {
+      const link = document.createElement("a");
+      link.download = "MulaqathBDK_HQ.png";
+      link.href = canvas.toDataURL("image/png", 1.0);
+      link.click();
+    });
+
+    frame.onload = draw;
+  </script>
+</body>
+</html>
