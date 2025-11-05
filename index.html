@@ -357,7 +357,7 @@
       
       // If there's an uploaded photo, fit it to the new frame
       if (uploadedPhoto) {
-        fitImageToFrame();
+        fitImageToWidth();
       }
       
       // Redraw
@@ -371,7 +371,7 @@
       img.onload = () => {
         uploadedPhoto = img;
         resetImage();
-        fitImageToFrame();
+        fitImageToWidth();
         draw();
       };
       img.src = URL.createObjectURL(file);
@@ -384,19 +384,17 @@
       updateZoomLevel();
     }
 
-    function fitImageToFrame() {
+    function fitImageToWidth() {
       if (!uploadedPhoto) return;
       
-      // Calculate the scale to fit the image within the frame while maintaining aspect ratio
+      // Calculate the scale to fit the image width to the frame width while maintaining aspect ratio
       const frameWidth = frames[currentFrame].width;
-      const frameHeight = frames[currentFrame].height;
       
-      // Calculate ratios
+      // Calculate ratio based on width
       const widthRatio = frameWidth / uploadedPhoto.width;
-      const heightRatio = frameHeight / uploadedPhoto.height;
       
-      // Use the smaller ratio to ensure the image fits within the frame
-      scale = Math.min(widthRatio, heightRatio) * 0.9; // 0.9 to leave some margin
+      // Use the width ratio to ensure the image fits the frame width
+      scale = widthRatio * 0.9; // 0.9 to leave some margin
       
       // Center the image
       offsetX = 0;
@@ -596,7 +594,7 @@
     document.getElementById("resetBtn").addEventListener("click", () => {
       if (uploadedPhoto) {
         resetImage();
-        fitImageToFrame();
+        fitImageToWidth();
         draw();
       }
     });
