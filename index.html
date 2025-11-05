@@ -43,9 +43,41 @@
 
     h2 {
       font-weight: 700;
-      margin-bottom: 30px;
+      margin-bottom: 20px;
       color: var(--primary-color);
       font-size: 2rem;
+    }
+
+    .frame-selector-container {
+      margin-bottom: 20px;
+    }
+
+    .frame-selector {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      background: white;
+      padding: 8px;
+      border-radius: var(--radius);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .frame-btn {
+      background: var(--secondary-color);
+      color: var(--text-color);
+      padding: 10px 16px;
+      font-size: 14px;
+      border-radius: var(--radius);
+    }
+
+    .frame-btn.active {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .frame-btn:hover {
+      background: var(--primary-color);
+      color: white;
     }
 
     .canvas-container {
@@ -194,6 +226,10 @@
         flex-direction: column;
         align-items: center;
       }
+      
+      .frame-selector {
+        flex-direction: column;
+      }
     }
   </style>
   <link href="https://fonts.googleapis.com/css2?family=Anek+Malayalam:wght@400;600;700&display=swap" rel="stylesheet">
@@ -202,6 +238,17 @@
 <body>
   <div class="container">
     <h2>📸 Mulaqath Day Poster</h2>
+    
+    <div class="frame-selector-container">
+      <div class="frame-selector">
+        <button class="frame-btn active" id="landscapeBtn">
+          <i class="fas fa-image"></i> Landscape
+        </button>
+        <button class="frame-btn" id="portraitBtn">
+          <i class="fas fa-portrait"></i> Portrait
+        </button>
+      </div>
+    </div>
 
     <div class="canvas-container">
       <canvas id="canvas" width="3508" height="2480"></canvas>
@@ -234,9 +281,28 @@
   <script>
     const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d");
-    const frame = new Image();
-    frame.src = "frame.png";
-
+    
+    // Frame configuration
+    const frames = {
+      landscape: {
+        width: 3508,
+        height: 2480,
+        image: new Image()
+      },
+      portrait: {
+        width: 2480,
+        height: 3071,
+        image: new Image()
+      }
+    };
+    
+    // Set frame image sources
+    frames.landscape.image.src = "frame_landscape.png";
+    frames.portrait.image.src = "frame_portrait.png";
+    
+    // Current frame state
+    let currentFrame = 'landscape';
+    
     let uploadedPhoto = null;
     let offsetX = 0, offsetY = 0;
     let scale = 1;
@@ -250,6 +316,36 @@
     
     // Movement speed factor
     const movementSpeed = 2.5;
+
+    // Frame selection buttons
+    document.getElementById("landscapeBtn").addEventListener("click", () => {
+      setFrame('landscape');
+    });
+    
+    document.getElementById("portraitBtn").addEventListener("click", () => {
+      setFrame('portrait');
+    });
+    
+    function setFrame(frameType) {
+      // Update active button
+      document.querySelectorAll('.frame-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      document.getElementById(frameType + 'Btn').classList.add('active');
+      
+      // Update current frame
+      currentFrame = frameType;
+      
+      // Update canvas dimensions
+      canvas.width = frames[frameType].width;
+      canvas.height = frames[frameType].height;
+      
+      // Reset image position and scale
+      resetImage();
+      
+      // Redraw
+      draw();
+    }
 
     document.getElementById("photoInput").addEventListener("change", e => {
       const file = e.target.files[0];
@@ -283,7 +379,7 @@
         const y = canvas.height / 2 - h / 2 + offsetY;
         ctx.drawImage(uploadedPhoto, x, y, w, h);
       }
-      ctx.drawImage(frame, 0, 0, canvas.width, canvas.height);
+      ctx.drawImage(frames[currentFrame].image, 0, 0, canvas.width, canvas.height);
     }
 
     // Mouse events
@@ -476,7 +572,7 @@
       const formattedSerial = serialNumber.toString().padStart(3, '0');
       
       const link = document.createElement("a");
-      link.download = `mulaqath_${formattedSerial}.png`;
+      link.download = `mulaqath_${currentFrame}_${formattedSerial}.png`;
       
       // Create a temporary canvas at full resolution
       const tempCanvas = document.createElement("canvas");
@@ -492,7 +588,11 @@
       link.click();
     });
 
-    frame.onload = draw;
+    // Initialize with landscape frame
+    frames.landscape.image.onload = draw;
+    frames.portrait.image.onload = () => {
+      if (currentFrame === 'portrait') draw();
+    };
   </script>
 </body>
 </html>
