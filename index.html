@@ -12,6 +12,8 @@
       --text-color: #1f2937;
       --shadow: 0 10px 25px rgba(0,0,0,0.1);
       --radius: 12px;
+      --canvas-bg: #e5e7eb; /* Changed from #f9fafb to a darker shade */
+      --canvas-inner-bg: #f0f1f3; /* Slightly different shade for inside the frame */
     }
 
     * {
@@ -86,7 +88,7 @@
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       margin: 0 auto 30px;
-      background: #f9fafb;
+      background: var(--canvas-bg); /* Changed to a darker shade */
       display: flex;
       justify-content: center;
       align-items: center;
@@ -97,7 +99,7 @@
       display: block;
       max-width: 100%;
       height: auto;
-      background: white;
+      background: var(--canvas-inner-bg); /* Changed to a slightly different shade */
       touch-action: none;
     }
 
@@ -343,6 +345,11 @@
       // Reset image position and scale
       resetImage();
       
+      // If there's an uploaded photo, fit it to the new frame
+      if (uploadedPhoto) {
+        fitImageToFrame();
+      }
+      
       // Redraw
       draw();
     }
@@ -354,6 +361,7 @@
       img.onload = () => {
         uploadedPhoto = img;
         resetImage();
+        fitImageToFrame();
         draw();
       };
       img.src = URL.createObjectURL(file);
@@ -363,6 +371,27 @@
       offsetX = 0;
       offsetY = 0;
       scale = 1;
+      updateZoomLevel();
+    }
+
+    function fitImageToFrame() {
+      if (!uploadedPhoto) return;
+      
+      // Calculate the scale to fit the image within the frame while maintaining aspect ratio
+      const frameWidth = frames[currentFrame].width;
+      const frameHeight = frames[currentFrame].height;
+      
+      // Calculate ratios
+      const widthRatio = frameWidth / uploadedPhoto.width;
+      const heightRatio = frameHeight / uploadedPhoto.height;
+      
+      // Use the smaller ratio to ensure the image fits within the frame
+      scale = Math.min(widthRatio, heightRatio) * 0.9; // 0.9 to leave some margin
+      
+      // Center the image
+      offsetX = 0;
+      offsetY = 0;
+      
       updateZoomLevel();
     }
 
@@ -557,6 +586,7 @@
     document.getElementById("resetBtn").addEventListener("click", () => {
       if (uploadedPhoto) {
         resetImage();
+        fitImageToFrame();
         draw();
       }
     });
