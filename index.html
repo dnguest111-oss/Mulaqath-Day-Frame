@@ -105,10 +105,17 @@
 
     .controls {
       display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
+      flex-direction: column;
+      align-items: center;
       gap: 15px;
       margin-top: 20px;
+    }
+
+    .control-row {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      flex-wrap: wrap;
     }
 
     .file-input-wrapper {
@@ -224,7 +231,7 @@
         font-size: 1.5rem;
       }
       
-      .controls {
+      .control-row {
         flex-direction: column;
         align-items: center;
       }
@@ -257,26 +264,29 @@
     </div>
 
     <div class="controls">
-      <div class="file-input-wrapper">
-        <input type="file" id="photoInput" accept="image/*">
-        <label for="photoInput" class="file-input-label">
-          <i class="fas fa-upload"></i> Upload Photo
-        </label>
+      <div class="control-row">
+        <div class="file-input-wrapper">
+          <input type="file" id="photoInput" accept="image/*">
+          <label for="photoInput" class="file-input-label">
+            <i class="fas fa-upload"></i> Upload Photo
+          </label>
+        </div>
+        
+        <button class="download-btn" id="downloadBtn">
+          <i class="fas fa-download"></i> Download
+        </button>
       </div>
       
-      <div class="zoom-controls">
-        <button class="zoom-btn" id="zoomOut">-</button>
-        <span class="zoom-level" id="zoomLevel">100%</span>
-        <button class="zoom-btn" id="zoomIn">+</button>
+      <div class="control-row">
+        <div class="zoom-controls">
+          <button class="zoom-btn" id="zoomOut">-</button>
+          <span class="zoom-level" id="zoomLevel">100%</span>
+          <button class="zoom-btn" id="zoomIn">+</button>
+          <button class="reset-btn" id="resetBtn">
+            <i class="fas fa-redo"></i> Reset
+          </button>
+        </div>
       </div>
-      
-      <button class="reset-btn" id="resetBtn">
-        <i class="fas fa-redo"></i> Reset
-      </button>
-      
-      <button class="download-btn" id="downloadBtn">
-        <i class="fas fa-download"></i> Download
-      </button>
     </div>
   </div>
 
